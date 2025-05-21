@@ -15,7 +15,7 @@ jobs:
       - name: Copy files to VM via SSH
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.VM_HOST }}
+          host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_DEPLOY_KEY }}
           port: 22
@@ -25,7 +25,7 @@ jobs:
       - name: SSH and restart service
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VM_HOST }}
+          host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_DEPLOY_KEY }}
           port: 22
