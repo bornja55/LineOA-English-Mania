@@ -18,7 +18,12 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     DATABASE_URL: str
-
+    LINE_LOGIN_CHANNEL_ID: str
+    LINE_LOGIN_CHANNEL_SECRET: str
+    LINE_MESSAGING_CHANNEL_ID: str
+    LINE_MESSAGING_CHANNEL_SECRET: str
+    LINE_CHANNEL_ACCESS_TOKEN: str
+    
     class Config:
         env_file = env_path
 
