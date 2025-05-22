@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from ..line_utils import verify_line_id_token
+from ..utils.line_utils import verify_line_id_token
 # สมมติว่ามีฟังก์ชัน get_or_create_user และ create_jwt_token อยู่แล้ว
 
 router = APIRouter()
