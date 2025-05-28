@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import models
 from .routers import students, courses, enrollments, auth, line_auth, line_webhook
@@ -10,6 +11,23 @@ app = FastAPI(
     title="English Mania API",
     description="API for English Mania School Management System",
     version="1.0.0"
+)
+
+# กำหนดโดเมนที่อนุญาตให้เข้าถึง API (แก้เป็นโดเมน frontend ของคุณ)
+origins = [
+    "https://bornja55.github.io",  # ตัวอย่างโดเมน LIFF app
+    "http://localhost",
+    "http://localhost:3000",
+    # เพิ่มโดเมนอื่น ๆ ที่ต้องการอนุญาต
+]
+
+# เพิ่ม CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # หรือใช้ ["*"] สำหรับทดสอบ
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # เพิ่ม routers
