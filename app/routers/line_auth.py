@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from ..utils.line_utils import verify_line_id_token
 from ..database import get_db
 from ..models.models import User
-from ..schemas.line import LineUserInfo
 from ..schemas.auth import LineLoginRequest, TokenResponse
 import jwt
 from datetime import datetime, timedelta
