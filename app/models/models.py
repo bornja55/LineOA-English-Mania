@@ -20,8 +20,8 @@ class Enrollment(Base):
     course_id = Column(Integer, ForeignKey("course.id"))
     enrolled_at = Column(DateTime, default=datetime.utcnow)
 
-    student = relationship("student", back_populates="enrollment")
-    course = relationship("course", back_populates="enrollment")
+    student = relationship("Student", back_populates="enrollments")
+    course = relationship("Course", back_populates="enrollments")
 
 class Student(Base):
     __tablename__ = "student"
@@ -36,8 +36,8 @@ class Student(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    enrollments = relationship("enrollment", back_populates="student")
-    attendances = relationship("attendance", back_populates="student")
+    enrollments = relationship("Enrollment", back_populates="student")
+    attendances = relationship("Attendance", back_populates="student")
 
 class Course(Base):
     __tablename__ = "course"
@@ -51,10 +51,10 @@ class Course(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    enrollments = relationship("enrollment", back_populates="course")
+    enrollments = relationship("Enrollment", back_populates="course")
     teacher_id = Column(Integer, ForeignKey("teacher.id"), nullable=True)
-    teacher = relationship("teacher", back_populates="courses")
-    attendances = relationship("attendance", back_populates="course")
+    teacher = relationship("Teacher", back_populates="courses")
+    attendances = relationship("Attendance", back_populates="course")
 
 class Teacher(Base):
     __tablename__ = "teacher"
@@ -82,7 +82,7 @@ class Classroom(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # ความสัมพันธ์กับตารางอื่น (เช่น Schedule ถ้ามี)
-    schedules = relationship("schedule", back_populates="classroom")
+    schedules = relationship("Schedule", back_populates="classroom")
 
 
 class Attendance(Base):
@@ -95,5 +95,5 @@ class Attendance(Base):
     status = Column(String, nullable=False)  # เช่น "present", "absent", "late"
     note = Column(String, nullable=True)
 
-    student = relationship("student", back_populates="attendances")
-    course = relationship("course", back_populates="attendances")
+    student = relationship("Student", back_populates="attendances")
+    course = relationship("Course", back_populates="attendances")
