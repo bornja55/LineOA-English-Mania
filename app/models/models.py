@@ -55,6 +55,7 @@ class Course(Base):
     teacher_id = Column(Integer, ForeignKey("teacher.id"), nullable=True)
     teacher = relationship("Teacher", back_populates="courses")
     attendances = relationship("Attendance", back_populates="course")
+    schedules = relationship("Schedule", back_populates="course")
 
 class Teacher(Base):
     __tablename__ = "teacher"
@@ -70,7 +71,6 @@ class Teacher(Base):
     # ความสัมพันธ์กับตารางอื่น (เช่น Course ถ้ามี)
     courses = relationship("Course", back_populates="teacher")
 
-
 class Classroom(Base):
     __tablename__ = "classroom"
 
@@ -83,7 +83,6 @@ class Classroom(Base):
 
     # ความสัมพันธ์กับตารางอื่น (เช่น Schedule ถ้ามี)
     schedules = relationship("Schedule", back_populates="classroom")
-
 
 class Attendance(Base):
     __tablename__ = "attendance"
@@ -109,4 +108,3 @@ class Schedule(Base):
 
     course = relationship("Course", back_populates="schedules")
     classroom = relationship("Classroom", back_populates="schedules")
-
