@@ -97,3 +97,16 @@ class Attendance(Base):
 
     student = relationship("Student", back_populates="attendances")
     course = relationship("Course", back_populates="attendances")
+
+class Schedule(Base):
+    __tablename__ = "schedule"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("course.id"), nullable=False)
+    classroom_id = Column(Integer, ForeignKey("classroom.id"), nullable=False)
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+
+    course = relationship("Course", back_populates="schedules")
+    classroom = relationship("Classroom", back_populates="schedules")
+
