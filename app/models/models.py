@@ -6,12 +6,14 @@ from datetime import datetime
 class User(Base):
     __tablename__ = "user"  # ชื่อตารางตรงกับฐานข้อมูล
     user_id = Column(Integer, primary_key=True, index=True)
-    role_id = Column(Integer, nullable=True)
+    role_id = Column(Integer, ForeignKey("role.id"), nullable=True)
     username = Column(String, unique=True, index=True, nullable=True)
     password_hash = Column(String, nullable=True)
     line_user_id = Column(String, unique=True, index=True, nullable=True)
     name = Column(String, nullable=True)
     email = Column(String, unique=True, index=True, nullable=True)
+
+    role = relationship("Role", back_populates="users")
 
 class Enrollment(Base):
     __tablename__ = "enrollment"  # ชื่อตารางตรงกับฐานข้อมูล

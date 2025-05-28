@@ -4,6 +4,7 @@ from .database import engine
 from .models import models
 from .routers import students, courses, enrollments, auth, line_auth, line_webhook
 
+
 # สร้างตารางในฐานข้อมูล (ถ้ายังไม่มี)
 models.Base.metadata.create_all(bind=engine)
 
