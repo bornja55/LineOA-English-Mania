@@ -22,7 +22,7 @@ async def create_student(student: schemas.StudentCreate, db: Session = Depends(g
     return new_student
 
 # อ่านรายชื่อนักเรียนทั้งหมด
-@router.get("/", response_model=list[schemas.Student])
+@router.get("/", response_model=list[schemas.StudentResponse])
 def read_students(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     students = db.query(models.Student).offset(skip).limit(limit).all()
     return students
