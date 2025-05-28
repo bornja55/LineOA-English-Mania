@@ -16,23 +16,21 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
     user = db.query(User).filter(User.line_user_id == line_user_id).first()
-    if not user:
-        user = User(
-            line_user_id=line_user_id,
-            name=user_info.get("name"),
-            email=user_info.get("email"),
-            username=user_info.get("email")  # อาจใช้ email เป็น username ชั่วคราว
-        )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-    else:
-        # ถ้าเจอ user แล้ว ให้อัปเดตข้อมูล (ถ้าต้องการ)
-        user.name = user_info.get("name")
-        user.email = user_info.get("email")
-        db.commit()
-        db.refresh(user)
-    return user
+    if user:
+        return user
+    # สร้าง username ชั่วคราวจาก line_user_id หรือ user_info
+    username = user_info.get("username") or f"user_{line_user_id[-6:]}"
+    new_user = User(
+        line_user_id=line_user_id,
+        username=username,
+        name=user_info.get("name"),
+        email=user_info.get("email"),
+        # กำหนดค่าอื่น ๆ ตามต้องการ
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
 
 def create_jwt_token(user: User):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
