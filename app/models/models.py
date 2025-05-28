@@ -3,6 +3,16 @@ from sqlalchemy.orm import relationship
 from ..database import Base
 from datetime import datetime
 
+class User(Base):
+    __tablename__ = "user"  # ชื่อตารางตรงกับฐานข้อมูล
+    user_id = Column(Integer, primary_key=True, index=True)
+    role_id = Column(Integer, nullable=True)
+    username = Column(String, unique=True, index=True, nullable=True)
+    password_hash = Column(String, nullable=True)
+    line_user_id = Column(String, unique=True, index=True, nullable=True)
+    name = Column(String, nullable=True)
+    email = Column(String, unique=True, index=True, nullable=True)
+
 class Student(Base):
     __tablename__ = "students"
 
