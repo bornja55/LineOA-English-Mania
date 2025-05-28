@@ -108,3 +108,23 @@ class Schedule(Base):
 
     course = relationship("Course", back_populates="schedules")
     classroom = relationship("Classroom", back_populates="schedules")
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_token"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user.user_id"))
+    token = Column(String, unique=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime)
+
+    user = relationship("User", back_populates="refresh_tokens")
+
+class Role(Base):
+    __tablename__ = "role"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+
+    users = relationship("User", back_populates="role")

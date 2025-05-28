@@ -2,6 +2,20 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
+# Role Schemas
+class RoleBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class RoleCreate(RoleBase):
+    pass
+
+class RoleResponse(RoleBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
 # User Schemas
 class UserBase(BaseModel):
     username: Optional[str]
@@ -13,6 +27,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     user_id: int
+    role: Optional[RoleResponse] = None  # เพิ่ม role
 
     class Config:
         orm_mode = True
@@ -133,13 +148,21 @@ class AttendanceResponse(AttendanceBase):
 class LineLoginRequest(BaseModel):
     id_token: str
 
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str
-
 class TokenData(BaseModel):
     user_id: int
     username: Optional[str] = None
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    token_type: str
 
 class MessageResponse(BaseModel):
     message: str
