@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
 
@@ -19,3 +19,18 @@ class Student(StudentBase):
 
     class Config:
         from_attributes = True
+
+class UserBase(BaseModel):
+    username: Optional[str]
+    name: Optional[str]
+    email: Optional[EmailStr]
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    user_id: int
+    line_user_id: Optional[str]
+
+    class Config:
+        orm_mode = True

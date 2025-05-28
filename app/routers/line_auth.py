@@ -2,15 +2,16 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from sqlalchemy.orm import Session
 from ..utils.line_utils import verify_line_id_token
 from ..database import get_db
-from ..models.models import User
+from ..models.models import User jwt
+from ..schemas.auth import LineLoginRequest, TokenResponse
 import jwt
 from datetime import datetime, timedelta
 
 router = APIRouter()
 
-SECRET_KEY = "your_secret_key_here"  # เปลี่ยนเป็นคีย์จริงของคุณ
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 วัน
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
     user = db.query(User).filter(User.line_user_id == line_user_id).first()
@@ -35,17 +36,27 @@ def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
 def create_jwt_token(user: User):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
-        "sub": str(user.id),
+        "sub": str(user.user_id),
         "name": user.name,
         "exp": expire
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
-@router.post("/auth/line")
-async def line_login(request: Request, db: Session = Depends(get_db)):
-    data = await request.json()
-    id_token = data.get("id_token")
+@router.post(
+    "/auth/line",
+    response_model=TokenResponse,
+    summary="Login with LINE ID token",
+    description="รับ id_token จาก LINE Login แล้วตรวจสอบและสร้าง JWT token สำหรับการยืนยันตัวตน"
+)
+async def line_login(request_data: LineLoginRequest, db: Session = Depends(get_db)):
+    """
+    Endpoint สำหรับรับ id_token จาก LINE Login
+
+    - **id_token**: Token ที่ได้จาก LINE Login SDK
+    - คืนค่า JWT access token สำหรับใช้ยืนยันตัวตนใน API อื่น ๆ
+    """
+    id_token = request_data.id_token
     if not id_token:
         raise HTTPException(status_code=400, detail="Missing id_token")
 
