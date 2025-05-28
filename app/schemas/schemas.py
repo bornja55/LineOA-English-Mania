@@ -130,6 +130,28 @@ class AttendanceResponse(AttendanceBase):
     class Config:
         orm_mode = True
 
+class LineLoginRequest(BaseModel):
+    id_token: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    user_id: int
+    username: Optional[str] = None
+
+class MessageResponse(BaseModel):
+    message: str
+
+class ErrorResponse(BaseModel):
+    detail: str
+
+class SuccessResponse(BaseModel):
+    success: bool
+    message: str
+
+
 # เพื่อแก้ไข circular reference
 CourseResponse.update_forward_refs()
 TeacherResponse.update_forward_refs()
