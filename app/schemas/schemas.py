@@ -34,3 +34,10 @@ class UserResponse(UserBase):
 
     class Config:
         orm_mode = True
+
+class LineLoginRequest(BaseModel):
+    id_token: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
