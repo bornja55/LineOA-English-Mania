@@ -23,6 +23,7 @@ def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
     new_user = User(
         line_user_id=line_user_id,
         username=username,
+        password_hash="",  # กำหนดเป็นค่าว่างแทน NULL
         name=user_info.get("name"),
         email=user_info.get("email"),
         # กำหนดค่าอื่น ๆ ตามต้องการ
