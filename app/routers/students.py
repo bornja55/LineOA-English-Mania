@@ -10,8 +10,8 @@ router = APIRouter(
 )
 
 # สร้างนักเรียนใหม่
-@router.post("/", response_model=schemas.Student)
-def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
+@router.post("/", response_model=schemas.StudentResponse)
+async def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
     db_student = db.query(models.Student).filter(models.Student.email == student.email).first()
     if db_student:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -28,7 +28,7 @@ def read_students(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     return students
 
 # อ่านข้อมูลนักเรียนรายคน
-@router.get("/{student_id}", response_model=schemas.Student)
+@router.get("/{student_id}", response_model=schemas.StudentResponse)
 def read_student(student_id: int, db: Session = Depends(get_db)):
     student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not student:
@@ -36,7 +36,7 @@ def read_student(student_id: int, db: Session = Depends(get_db)):
     return student
 
 # อัปเดตข้อมูลนักเรียน
-@router.put("/{student_id}", response_model=schemas.Student)
+@router.put("/{student_id}", response_model=schemas.StudentResponse)
 def update_student(student_id: int, student: schemas.StudentCreate, db: Session = Depends(get_db)):
     db_student = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not db_student:
