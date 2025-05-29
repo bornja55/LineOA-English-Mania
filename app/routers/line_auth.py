@@ -8,7 +8,10 @@ from ..schemas.schemas import LineLoginRequest, TokenResponse, RefreshTokenReque
 import jwt
 from datetime import datetime, timedelta
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/auth/line",
+    tags=["line_auth"]
+)
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -66,7 +69,7 @@ def store_refresh_token(db: Session, user: User, refresh_token: str):
     return db_refresh_token
 
 @router.post(
-    "/auth/line",
+    "/login",
     response_model=TokenResponse,
     summary="Login with LINE ID token",
     description="รับ id_token จาก LINE Login แล้วตรวจสอบและสร้าง JWT token สำหรับการยืนยันตัวตน"
@@ -93,7 +96,7 @@ async def line_login(request_data: LineLoginRequest, db: Session = Depends(get_d
     }
 
 @router.post(
-    "/auth/refresh",
+    "/refresh",
     response_model=RefreshTokenResponse,
     summary="Refresh access token",
     description="รับ refresh token เพื่อขอ access token ใหม่"
