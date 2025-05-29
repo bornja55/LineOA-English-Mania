@@ -174,6 +174,61 @@ class SuccessResponse(BaseModel):
     success: bool
     message: str
 
+# Invoice Schemas
+class InvoiceBase(BaseModel):
+    student_id: int
+    enrollment_id: int
+    invoice_date: datetime
+    due_date: datetime
+    total_amount: float
+    description: Optional[str] = None
+    status: Optional[str] = "pending"
+
+class InvoiceCreate(InvoiceBase):
+    pass
+
+class InvoiceResponse(InvoiceBase):
+    invoice_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+# Income Schemas
+class IncomeBase(BaseModel):
+    payment_id: int
+    income_date: datetime
+    income_type: Optional[str] = None
+    amount: float
+    description: Optional[str] = None
+
+class IncomeCreate(IncomeBase):
+    pass
+
+class IncomeResponse(IncomeBase):
+    income_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+# Expense Schemas
+class ExpenseBase(BaseModel):
+    expense_date: datetime
+    expense_type: Optional[str] = None
+    amount: float
+    description: Optional[str] = None
+    vendor: Optional[str] = None
+
+class ExpenseCreate(ExpenseBase):
+    pass
+
+class ExpenseResponse(ExpenseBase):
+    expense_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 # เพื่อแก้ไข circular reference
 CourseResponse.update_forward_refs()

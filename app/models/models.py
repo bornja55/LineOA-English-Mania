@@ -130,3 +130,60 @@ class Role(Base):
     description = Column(Text, nullable=True)
 
     users = relationship("User", back_populates="role")
+
+class Invoice(Base):
+    __tablename__ = "invoice"
+
+    invoice_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.id"), nullable=False)
+    enrollment_id = Column(Integer, ForeignKey("enrollment.id"), nullable=False)
+    invoice_date = Column(DateTime, nullable=False)
+    due_date = Column(DateTime, nullable=False)
+    total_amount = Column(Float, nullable=False)
+    description = Column(Text, nullable=True)
+    status = Column(String(50), default="pending")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    student = relationship("Student")
+    enrollment = relationship("Enrollment")
+    payments = relationship("Payment", back_populates="invoice")
+
+class Income(Base):
+    __tablename__ = "income"
+
+    income_id = Column(Integer, primary_key=True, index=True)
+    payment_id = Column(Integer, ForeignKey("payment.id"), nullable=False)
+    income_date = Column(DateTime, nullable=False)
+    income_type = Column(String(100), nullable=True)
+    amount = Column(Float, nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    payment = relationship("Payment")
+
+class Expense(Base):
+    __tablename__ = "expense"
+
+    expense_id = Column(Integer, primary_key=True, index=True)
+    expense_date = Column(DateTime, nullable=False)
+    expense_type = Column(String(100), nullable=True)
+    amount = Column(Float, nullable=False)
+    description = Column(Text, nullable=True)
+    vendor = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Payment(Base):
+    __tablename__ = "payment"
+
+    id = Column(Integer, primary_key=True, index=True)
+    enrollment_id = Column(Integer, ForeignKey("enrollment.id"))
+    invoice_id = Column(Integer, ForeignKey("invoice.invoice_id"), nullable=True)
+    amount = Column(Float)
+    payment_date = Column(DateTime)
+    payment_method = Column(String)
+    slip_url = Column(String)
+    status = Column(String)
+    payment_status = Column(String, default="pending")
+
+    invoice = relationship("Invoice", back_populates="payments")
+    enrollment = relationship("Enrollment")
