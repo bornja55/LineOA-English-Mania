@@ -14,6 +14,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=True)
 
     role = relationship("Role", back_populates="users")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
 
 class Enrollment(Base):
     __tablename__ = "enrollment"  # ชื่อตารางตรงกับฐานข้อมูล
