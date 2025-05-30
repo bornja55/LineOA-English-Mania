@@ -1,14 +1,12 @@
-# models/models.py
-
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Text, Date
 from sqlalchemy.orm import relationship
 from ..database import Base
 from datetime import datetime
 
 class User(Base):
-    __tablename__ = "user"  # ชื่อตารางตรงกับฐานข้อมูล
+    __tablename__ = "user"
     user_id = Column(Integer, primary_key=True, index=True)
-    role_id = Column(Integer, ForeignKey("role.id"), nullable=True)
+    role_id = Column(Integer, ForeignKey("role.role_id"), nullable=True)
     username = Column(String, unique=True, index=True, nullable=True)
     password_hash = Column(String, nullable=True)
     line_user_id = Column(String, unique=True, index=True, nullable=True)
@@ -18,22 +16,18 @@ class User(Base):
     role = relationship("Role", back_populates="users")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
 
-class Enrollment(Base):
-    __tablename__ = "enrollment"
-    enrollment_id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("student.student_id"))
-    course_id = Column(Integer, ForeignKey("course.course_id"))
-    enroll_date = Column(Date)  # แก้ชื่อจาก enrolled_at เป็น enroll_date
-    expire_date = Column(Date)
-    status = Column(String(20))
+class Role(Base):
+    __tablename__ = "role"
+    role_id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
 
-    student = relationship("Student", back_populates="enrollments")
-    course = relationship("Course", back_populates="enrollments")
+    users = relationship("User", back_populates="role")
 
 class Student(Base):
     __tablename__ = "student"
 
-    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String, unique=True, index=True)
@@ -42,14 +36,13 @@ class Student(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
     enrollments = relationship("Enrollment", back_populates="student")
     attendances = relationship("Attendance", back_populates="student")
 
 class Course(Base):
     __tablename__ = "course"
 
-    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
     start_date = Column(DateTime, nullable=True)
@@ -57,17 +50,28 @@ class Course(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
     enrollments = relationship("Enrollment", back_populates="course")
-    teacher_id = Column(Integer, ForeignKey("teacher.id"), nullable=True)
+    teacher_id = Column(Integer, ForeignKey("teacher.teacher_id"), nullable=True)
     teacher = relationship("Teacher", back_populates="courses")
     attendances = relationship("Attendance", back_populates="course")
     schedules = relationship("Schedule", back_populates="course")
 
+class Enrollment(Base):
+    __tablename__ = "enrollment"
+    enrollment_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.student_id"))
+    course_id = Column(Integer, ForeignKey("course.course_id"))
+    enroll_date = Column(Date)
+    expire_date = Column(Date)
+    status = Column(String(20))
+
+    student = relationship("Student", back_populates="enrollments")
+    course = relationship("Course", back_populates="enrollments")
+
 class Teacher(Base):
     __tablename__ = "teacher"
 
-    id = Column(Integer, primary_key=True, index=True)
+    teacher_id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=True)
@@ -75,28 +79,26 @@ class Teacher(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # ความสัมพันธ์กับตารางอื่น (เช่น Course ถ้ามี)
     courses = relationship("Course", back_populates="teacher")
 
 class Classroom(Base):
     __tablename__ = "classroom"
 
-    id = Column(Integer, primary_key=True, index=True)
+    classroom_id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     location = Column(String, nullable=True)
     capacity = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # ความสัมพันธ์กับตารางอื่น (เช่น Schedule ถ้ามี)
     schedules = relationship("Schedule", back_populates="classroom")
 
 class Attendance(Base):
     __tablename__ = "attendance"
 
-    id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("student.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("course.id"), nullable=False)
+    attendance_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.student_id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("course.course_id"), nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
     status = Column(String, nullable=False)  # เช่น "present", "absent", "late"
     note = Column(String, nullable=True)
@@ -107,9 +109,9 @@ class Attendance(Base):
 class Schedule(Base):
     __tablename__ = "schedule"
 
-    id = Column(Integer, primary_key=True, index=True)
-    course_id = Column(Integer, ForeignKey("course.id"), nullable=False)
-    classroom_id = Column(Integer, ForeignKey("classroom.id"), nullable=False)
+    schedule_id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("course.course_id"), nullable=False)
+    classroom_id = Column(Integer, ForeignKey("classroom.classroom_id"), nullable=False)
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
 
@@ -127,21 +129,12 @@ class RefreshToken(Base):
 
     user = relationship("User", back_populates="refresh_tokens")
 
-class Role(Base):
-    __tablename__ = "role"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), unique=True, nullable=False)
-    description = Column(Text, nullable=True)
-
-    users = relationship("User", back_populates="role")
-
 class Invoice(Base):
     __tablename__ = "invoice"
 
     invoice_id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("student.id"), nullable=False)
-    enrollment_id = Column(Integer, ForeignKey("enrollment.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("student.student_id"), nullable=False)
+    enrollment_id = Column(Integer, ForeignKey("enrollment.enrollment_id"), nullable=False)
     invoice_date = Column(DateTime, nullable=False)
     due_date = Column(DateTime, nullable=False)
     total_amount = Column(Float, nullable=False)
@@ -153,11 +146,27 @@ class Invoice(Base):
     enrollment = relationship("Enrollment")
     payments = relationship("Payment", back_populates="invoice")
 
+class Payment(Base):
+    __tablename__ = "payment"
+
+    payment_id = Column(Integer, primary_key=True, index=True)
+    enrollment_id = Column(Integer, ForeignKey("enrollment.enrollment_id"))
+    invoice_id = Column(Integer, ForeignKey("invoice.invoice_id"), nullable=True)
+    amount = Column(Float)
+    payment_date = Column(DateTime)
+    payment_method = Column(String)
+    slip_url = Column(String)
+    status = Column(String)
+    payment_status = Column(String, default="pending")
+
+    invoice = relationship("Invoice", back_populates="payments")
+    enrollment = relationship("Enrollment")
+
 class Income(Base):
     __tablename__ = "income"
 
     income_id = Column(Integer, primary_key=True, index=True)
-    payment_id = Column(Integer, ForeignKey("payment.id"), nullable=False)
+    payment_id = Column(Integer, ForeignKey("payment.payment_id"), nullable=False)
     income_date = Column(DateTime, nullable=False)
     income_type = Column(String(100), nullable=True)
     amount = Column(Float, nullable=False)
@@ -176,19 +185,3 @@ class Expense(Base):
     description = Column(Text, nullable=True)
     vendor = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-
-class Payment(Base):
-    __tablename__ = "payment"
-
-    id = Column(Integer, primary_key=True, index=True)
-    enrollment_id = Column(Integer, ForeignKey("enrollment.id"))
-    invoice_id = Column(Integer, ForeignKey("invoice.invoice_id"), nullable=True)
-    amount = Column(Float)
-    payment_date = Column(DateTime)
-    payment_method = Column(String)
-    slip_url = Column(String)
-    status = Column(String)
-    payment_status = Column(String, default="pending")
-
-    invoice = relationship("Invoice", back_populates="payments")
-    enrollment = relationship("Enrollment")
