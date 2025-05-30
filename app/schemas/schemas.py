@@ -1,3 +1,5 @@
+# schemas/schemas.py
+
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
@@ -226,6 +228,24 @@ class ExpenseCreate(ExpenseBase):
 class ExpenseResponse(ExpenseBase):
     expense_id: int
     created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+class PaymentBase(BaseModel):
+    enrollment_id: int
+    invoice_id: Optional[int] = None
+    amount: float
+    payment_date: Optional[datetime] = None
+    payment_method: Optional[str] = None
+    slip_url: Optional[str] = None
+    status: Optional[str] = "pending"
+
+class PaymentCreate(PaymentBase):
+    pass
+
+class PaymentResponse(PaymentBase):
+    id: int
 
     class Config:
         orm_mode = True
