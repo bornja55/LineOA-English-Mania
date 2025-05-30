@@ -11,13 +11,15 @@ router = APIRouter(
     tags=["enrollments"]
 )
 
+from datetime import date
+
 @router.post("/", response_model=EnrollmentResponse)
 def create_enrollment(enrollment: EnrollmentCreate, db: Session = Depends(get_db)):
     # สร้าง enrollment โดยกำหนด enroll_date เป็นวันนี้
     db_enrollment = Enrollment(
         student_id=enrollment.student_id,
         course_id=enrollment.course_id,
-        enroll_date=date.today(),
+        enroll_date=date.today(),  # ใช้ enroll_date แทน enrolled_at
         status="active"
     )
     db.add(db_enrollment)
@@ -32,8 +34,8 @@ def create_enrollment(enrollment: EnrollmentCreate, db: Session = Depends(get_db
     invoice_data = InvoiceCreate(
         student_id=enrollment.student_id,
         enrollment_id=db_enrollment.enrollment_id,
-        invoice_date=datetime.utcnow().date(),
-        due_date=(datetime.utcnow() + timedelta(days=7)).date(),
+        invoice_date=date.today(),
+        due_date=date.today() + timedelta(days=7),
         total_amount=total_amount,
         description="Invoice for enrollment",
         status="pending"
