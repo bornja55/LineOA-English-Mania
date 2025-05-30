@@ -19,11 +19,13 @@ class User(Base):
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
 
 class Enrollment(Base):
-    __tablename__ = "enrollment"  # ชื่อตารางตรงกับฐานข้อมูล
-    id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("student.id"))
-    course_id = Column(Integer, ForeignKey("course.id"))
-    enrolled_at = Column(DateTime, default=datetime.utcnow)
+    __tablename__ = "enrollment"
+    enrollment_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.student_id"))
+    course_id = Column(Integer, ForeignKey("course.course_id"))
+    enroll_date = Column(Date)  # แก้ชื่อจาก enrolled_at เป็น enroll_date
+    expire_date = Column(Date)
+    status = Column(String(20))
 
     student = relationship("Student", back_populates="enrollments")
     course = relationship("Course", back_populates="enrollments")
