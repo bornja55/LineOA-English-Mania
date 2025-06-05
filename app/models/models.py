@@ -15,6 +15,19 @@ class User(Base):
     role = relationship("Role", back_populates="users")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
 
+class Admin(Base):
+    __tablename__ = "admin"
+    admin_id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    password_hash = Column(String)
+    role_id = Column(Integer, ForeignKey("role.role_id"))  # เพิ่ม foreign key
+    is_active = Column(Boolean, default=True)
+
+    role = relationship("Role", back_populates="admins")  # เพิ่ม relationship
+
+    def is_admin(self):
+        return self.role.role_name == "admin"  # เพิ่ม method ตรวจสอบสิทธิ์
+
 class Role(Base):
     __tablename__ = "role"
     role_id = Column(Integer, primary_key=True, index=True)
@@ -263,16 +276,3 @@ class StudentAnswer(Base):
     student_exam = relationship("StudentExam", back_populates="answers")
     question = relationship("Question")
     choice = relationship("Choice")
-
-class Admin(Base):
-    __tablename__ = "admin"
-    admin_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password_hash = Column(String)
-    role_id = Column(Integer, ForeignKey("role.role_id"))  # เพิ่ม foreign key
-    is_active = Column(Boolean, default=True)
-
-    role = relationship("Role", back_populates="admins")  # เพิ่ม relationship
-
-    def is_admin(self):
-        return self.role.role_name == "admin"  # เพิ่ม method ตรวจสอบสิทธิ์
