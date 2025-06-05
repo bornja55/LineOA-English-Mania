@@ -6,14 +6,14 @@ from datetime import datetime
 
 # Role Schemas
 class RoleBase(BaseModel):
-    name: str
+    role_name: str
     description: Optional[str] = None
 
 class RoleCreate(RoleBase):
     pass
 
 class RoleResponse(RoleBase):
-    id: int
+    role_id: int
 
     class Config:
         orm_mode = True
