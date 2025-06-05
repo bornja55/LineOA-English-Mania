@@ -1,5 +1,3 @@
-# schemas/schemas.py
-
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
@@ -12,33 +10,21 @@ class RoleBase(BaseModel):
     class Config:
         orm_mode = True
 
+class RoleResponse(RoleBase):
+    pass
+
+# User Schemas
 class UserBase(BaseModel):
     user_id: int
     username: Optional[str]
     email: Optional[str]
-    role: Optional[RoleBase]
+    role: Optional[RoleResponse] = None
 
     class Config:
         orm_mode = True
 
 class UserResponse(UserBase):
     pass
-
-# User Schemas
-class UserBase(BaseModel):
-    username: Optional[str]
-    name: Optional[str]
-    email: Optional[EmailStr]
-
-class UserCreate(UserBase):
-    password: str
-
-class UserResponse(UserBase):
-    user_id: int
-    role: Optional[RoleResponse] = None  # เพิ่ม role
-
-    class Config:
-        orm_mode = True
 
 # Enrollment Schemas
 class EnrollmentBase(BaseModel):
