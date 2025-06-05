@@ -1,3 +1,4 @@
+#app/routers/line_auth.py
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from ..utils.line_utils import verify_line_id_token
@@ -76,6 +77,13 @@ def store_refresh_token(db: Session, user: User, refresh_token: str):
     db.commit()
     db.refresh(db_refresh_token)
     return db_refresh_token
+
+def role_required(allowed_roles: list):
+    def role_checker(current_user: dict = Depends(get_current_user)):
+        if current_user["role"] not in allowed_roles:
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+        return current_user
+    return role_checker
 
 @router.post(
     "/login",

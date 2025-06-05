@@ -6,6 +6,7 @@ from typing import List
 from ..database import get_db
 from ..models.models import Invoice
 from ..schemas.schemas import InvoiceCreate, InvoiceResponse
+from app.routers.auth import admin_required
 
 router = APIRouter(
     prefix="/invoices",

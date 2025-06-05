@@ -53,16 +53,18 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
         role: str = payload.get("role")
-        if username is None or role != "admin":
+        if username is None or role is None:  # แก้ไขให้ตรวจสอบ role ด้วย
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     admin = db.query(Admin).filter(Admin.username == username).first()
     if admin is None:
         raise credentials_exception
-    return {"username": username, "role": role}
+    return {"admin": admin, "role": role}  # return admin object และ role
 
-def admin_required(current_admin=Depends(get_current_admin)):
-    if current_admin["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    return current_admin
+def admin_required(allowed_roles: list):
+    def check_role(current_admin: dict = Depends(get_current_admin)):
+        if current_admin["role"] not in allowed_roles:
+            raise HTTPException(status_code=403, detail="Not enough permissions")
+        return current_admin
+    return check_role

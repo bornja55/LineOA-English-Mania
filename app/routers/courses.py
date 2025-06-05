@@ -1,4 +1,8 @@
 from fastapi import APIRouter
+from app.routers.auth import admin_required
+from app.database import get_db
+from sqlalchemy.orm import Session
+from app.models.models import Course  # Import Course model if needed
 
 router = APIRouter(
     prefix="/courses",

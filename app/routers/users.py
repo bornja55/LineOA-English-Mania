@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models.models import User, Role
 from app.schemas.schemas import UserResponse
 from app.routers.line_auth import get_current_user  # สมมติมีฟังก์ชันนี้สำหรับดึง user จาก token
+from app.routers.auth import admin_required
 
 router = APIRouter(
     prefix="/users",

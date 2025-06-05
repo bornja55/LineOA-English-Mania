@@ -2,23 +2,31 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.orm import Session
 from ..database import get_db
-from app.routers.line_auth import get_current_user
+from app.routers.line_auth import get_current_user, role_required
 from app.schemas import schemas
 from app.models import models
+from app.routers.auth import admin_required
 
 router = APIRouter(
     prefix="/exams",
     tags=["exams"],
 )
 
-# สร้างข้อสอบใหม่
+from app.routers.line_auth import get_current_user, role_required
+
+# สร้างข้อสอบใหม่ (admin, teacher เท่านั้น)
 @router.post("/", response_model=schemas.ExamRead)
-def create_exam(exam: schemas.ExamCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+def create_exam(
+    exam: schemas.ExamCreate,
+    db: Session = Depends(get_db),
+    user=Depends(role_required(["admin", "teacher"]))
+):
     db_exam = models.Exam(**exam.dict())
     db.add(db_exam)
     db.commit()
     db.refresh(db_exam)
     return db_exam
+
 
 # ดึงรายการข้อสอบทั้งหมด
 @router.get("/", response_model=List[schemas.ExamRead])
@@ -36,16 +44,19 @@ def get_exam(exam_id: int, db: Session = Depends(get_db)):
 
 # นักเรียนเริ่มสอบ (สร้าง student_exam record)
 @router.post("/{exam_id}/start", response_model=schemas.StudentExamRead)
-def start_exam(exam_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    # ตรวจสอบข้อสอบ
+def start_exam(
+    exam_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(role_required(["student"]))  # ตรวจสอบ role ว่าเป็น student เท่านั้น
+):
     exam = db.query(models.Exam).filter(models.Exam.exam_id == exam_id).first()
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
-    # ตรวจสอบว่าผู้ใช้เป็นนักเรียน
-    student_id = user.student_id
+
+    student_id = user["user"].student_id
     if not student_id:
         raise HTTPException(status_code=403, detail="User is not a student")
-    # สร้าง student_exam
+
     student_exam = models.StudentExam(student_id=student_id, exam_id=exam_id, status="in_progress")
     db.add(student_exam)
     db.commit()
