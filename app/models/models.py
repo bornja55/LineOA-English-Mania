@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Text, Date
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Text, Date, Numeric
 from sqlalchemy.orm import relationship
 from ..database import Base
 from datetime import datetime
@@ -185,3 +185,81 @@ class Expense(Base):
     description = Column(Text, nullable=True)
     vendor = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Exam(Base):
+    __tablename__ = "exams"
+
+    exam_id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    status = Column(String(50), default="active")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    questions = relationship("Question", back_populates="exam", cascade="all, delete-orphan")
+    student_exams = relationship("StudentExam", back_populates="exam", cascade="all, delete-orphan")
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    question_id = Column(Integer, primary_key=True, index=True)
+    exam_id = Column(Integer, ForeignKey("exams.exam_id", ondelete="CASCADE"), nullable=False)
+    question_text = Column(Text, nullable=False)
+    question_type = Column(String(50), nullable=False)  # e.g. 'multiple_choice', 'fill_in_blank', 'essay'
+    media_url = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    exam = relationship("Exam", back_populates="questions")
+    choices = relationship("Choice", back_populates="question", cascade="all, delete-orphan")
+
+
+class Choice(Base):
+    __tablename__ = "choices"
+
+    choice_id = Column(Integer, primary_key=True, index=True)
+    question_id = Column(Integer, ForeignKey("questions.question_id", ondelete="CASCADE"), nullable=False)
+    choice_text = Column(Text, nullable=False)
+    is_correct = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    question = relationship("Question", back_populates="choices")
+
+
+class StudentExam(Base):
+    __tablename__ = "student_exams"
+
+    student_exam_id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student.student_id", ondelete="CASCADE"), nullable=False)
+    exam_id = Column(Integer, ForeignKey("exams.exam_id", ondelete="CASCADE"), nullable=False)
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+    status = Column(String(50), default="in_progress")  # in_progress, completed
+    score = Column(Numeric(5, 2))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    exam = relationship("Exam", back_populates="student_exams")
+    student = relationship("Student")  # Assuming Student model exists
+    answers = relationship("StudentAnswer", back_populates="student_exam", cascade="all, delete-orphan")
+
+
+class StudentAnswer(Base):
+    __tablename__ = "student_answers"
+
+    student_answer_id = Column(Integer, primary_key=True, index=True)
+    student_exam_id = Column(Integer, ForeignKey("student_exams.student_exam_id", ondelete="CASCADE"), nullable=False)
+    question_id = Column(Integer, ForeignKey("questions.question_id", ondelete="CASCADE"), nullable=False)
+    choice_id = Column(Integer, ForeignKey("choices.choice_id"), nullable=True)
+    answer_text = Column(Text, nullable=True)
+    is_correct = Column(Boolean)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student_exam = relationship("StudentExam", back_populates="answers")
+    question = relationship("Question")
+    choice = relationship("Choice")

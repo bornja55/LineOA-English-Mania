@@ -40,6 +40,7 @@ app.include_router(line_auth.router)
 app.include_router(line_webhook.router)
 app.include_router(invoice.router)
 app.include_router(finance.router)
+app.include_router(exams.router)
 
 @app.get("/")
 def read_root():

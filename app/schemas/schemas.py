@@ -250,6 +250,104 @@ class PaymentResponse(PaymentBase):
     class Config:
         orm_mode = True
 
+# Schemas สำหรับ Choice
+class ChoiceBase(BaseModel):
+    choice_text: str
+    is_correct: Optional[bool] = False
+
+class ChoiceCreate(ChoiceBase):
+    pass
+
+class ChoiceRead(ChoiceBase):
+    choice_id: int
+
+    class Config:
+        orm_mode = True
+
+# Schemas สำหรับ Question
+class QuestionBase(BaseModel):
+    question_text: str
+    question_type: str  # e.g. 'multiple_choice', 'fill_in_blank', 'essay'
+    media_url: Optional[str] = None
+
+class QuestionCreate(QuestionBase):
+    choices: Optional[List[ChoiceCreate]] = []
+
+class QuestionRead(QuestionBase):
+    question_id: int
+    choices: List[ChoiceRead] = []
+
+    class Config:
+        orm_mode = True
+
+# Schemas สำหรับ Exam
+class ExamBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: Optional[str] = "active"
+
+class ExamCreate(ExamBase):
+    questions: Optional[List[QuestionCreate]] = []
+
+class ExamRead(ExamBase):
+    exam_id: int
+
+    class Config:
+        orm_mode = True
+
+class ExamDetail(ExamRead):
+    questions: List[QuestionRead] = []
+
+# Schemas สำหรับ StudentExam
+class StudentExamBase(BaseModel):
+    status: Optional[str] = "in_progress"
+    score: Optional[float] = None
+
+class StudentExamCreate(StudentExamBase):
+    exam_id: int
+
+class StudentExamRead(StudentExamBase):
+    student_exam_id: int
+    student_id: int
+    exam_id: int
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+# Schemas สำหรับ StudentAnswer
+class StudentAnswerBase(BaseModel):
+    question_id: int
+    choice_id: Optional[int] = None
+    answer_text: Optional[str] = None
+
+class StudentAnswerCreate(StudentAnswerBase):
+    pass
+
+class StudentAnswerRead(StudentAnswerBase):
+    student_answer_id: int
+    is_correct: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
+
+# Schema สำหรับผลสอบ (รวมคะแนนและสถานะ)
+class StudentExamResult(BaseModel):
+    student_exam_id: int
+    student_id: int
+    exam_id: int
+    status: str
+    score: Optional[float] = None
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+
 # เพื่อแก้ไข circular reference
 CourseResponse.update_forward_refs()
 TeacherResponse.update_forward_refs()
