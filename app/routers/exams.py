@@ -5,7 +5,7 @@ from ..database import get_db
 from app.routers.line_auth import get_current_user, role_required
 from app.schemas import schemas
 from app.models import models
-from app.routers.auth import admin_required
+from app.core.security import admin_required
 
 router = APIRouter(
     prefix="/exams",

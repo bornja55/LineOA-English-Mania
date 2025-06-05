@@ -6,7 +6,7 @@ from typing import List
 from ..database import get_db
 from ..models.models import Income, Expense
 from ..schemas.schemas import IncomeCreate, IncomeResponse, ExpenseCreate, ExpenseResponse
-from app.routers.auth import admin_required
+from app.core.security import admin_required
 
 router = APIRouter(
     prefix="/finance",

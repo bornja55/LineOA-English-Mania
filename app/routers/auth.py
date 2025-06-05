@@ -1,9 +1,7 @@
-# app/routers/auth.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.routers import admin
-from app.models.models import Role  # import Role model
+from app.models.models import Admin, Role  # import Admin และ Role model
 from app.core.config import settings
 from passlib.context import CryptContext
 from jose import jwt, JWTError
@@ -11,12 +9,12 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 import datetime
 
 router = APIRouter(
-    prefix="/admin",
-    tags=["admin"]
+    prefix="/auth",
+    tags=["auth"]
 )
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/admin/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -31,7 +29,7 @@ def admin_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     # ดึง role_name จากตาราง Role
-    role = db.query(Role).filter(Role.role_id == admin.role).first()
+    role = db.query(Role).filter(Role.role_id == admin.role_id).first()
     role_name = role.role_name if role else "admin"  # กรณีไม่มี role ให้ default เป็น admin
 
     access_token_expires = datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -53,14 +51,14 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str = payload.get("sub")
         role: str = payload.get("role")
-        if username is None or role is None:  # แก้ไขให้ตรวจสอบ role ด้วย
+        if username is None or role is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     admin = db.query(Admin).filter(Admin.username == username).first()
     if admin is None:
         raise credentials_exception
-    return {"admin": admin, "role": role}  # return admin object และ role
+    return {"admin": admin, "role": role}
 
 def admin_required(allowed_roles: list):
     def check_role(current_admin: dict = Depends(get_current_admin)):

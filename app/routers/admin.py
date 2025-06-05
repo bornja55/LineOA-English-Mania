@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import User, Role
 from app.schemas.schemas import UserResponse
-from app.routers.auth import admin_required
+from app.core.security import admin_required
 
 router = APIRouter(
     prefix="/admin",
