@@ -3,6 +3,8 @@ from typing import List
 from sqlalchemy.orm import Session
 from ..database import get_db
 from app.routers.line_auth import get_current_user
+from app.schemas import schemas
+from app.models import models
 
 router = APIRouter(
     prefix="/exams",
