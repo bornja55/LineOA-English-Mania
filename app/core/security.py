@@ -4,7 +4,6 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.models import User
-from . import admin  # ลบ import นี้
 import os
 from dotenv import load_dotenv
 
