@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from ..database import get_db
-from ..models.admin import Admin
-from ..core.config import settings  # import settings จาก config
+from app.database import get_db
+from app.models.admin import Admin
+from app.core.config import settings  # import settings จาก config
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
