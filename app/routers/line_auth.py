@@ -45,7 +45,7 @@ def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
 
 def create_access_token(user: User, db: Session):
     role = db.query(Role).filter(Role.role_id == user.role_id).first()
-    role_name = role.role_name if role else "student"
+    role_name = user.role.role_name if user.role else "student"
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user.user_id),
