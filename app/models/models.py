@@ -1,3 +1,4 @@
+# app/models/models.py
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Float, Text, Date, Numeric
 from sqlalchemy.orm import relationship
 from ..database import Base
@@ -14,19 +15,6 @@ class User(Base):
 
     role = relationship("Role", back_populates="users")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
-
-class Admin(Base):
-    __tablename__ = "admin"
-    admin_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    password_hash = Column(String)
-    role_id = Column(Integer, ForeignKey("role.role_id"))  # เพิ่ม foreign key
-    is_active = Column(Boolean, default=True)
-
-    role = relationship("Role", back_populates="admins")  # เพิ่ม relationship
-
-    def is_admin(self):
-        return self.role.role_name == "admin"  # เพิ่ม method ตรวจสอบสิทธิ์
 
 class Role(Base):
     __tablename__ = "role"
@@ -276,3 +264,18 @@ class StudentAnswer(Base):
     student_exam = relationship("StudentExam", back_populates="answers")
     question = relationship("Question")
     choice = relationship("Choice")
+
+class Admin(Base):
+    __tablename__ = "admin"
+
+    admin_id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    role_id = Column(Integer, ForeignKey("role.role_id"))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    role = relationship("Role", back_populates="admins")
+
+    def is_admin(self):
+        return self.role.role_name == "admin"

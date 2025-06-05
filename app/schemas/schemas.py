@@ -6,17 +6,23 @@ from datetime import datetime
 
 # Role Schemas
 class RoleBase(BaseModel):
-    role_name: str
-    # description: Optional[str] = None
-
-class RoleCreate(RoleBase):
-    pass
-
-class RoleResponse(RoleBase):
     role_id: int
+    role_name: str
 
     class Config:
         orm_mode = True
+
+class UserBase(BaseModel):
+    user_id: int
+    username: Optional[str]
+    email: Optional[str]
+    role: Optional[RoleBase]
+
+    class Config:
+        orm_mode = True
+
+class UserResponse(UserBase):
+    pass
 
 # User Schemas
 class UserBase(BaseModel):

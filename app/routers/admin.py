@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.models import User, Role
-from app.schemas.schemas import UserResponse, UserBase
+from app.schemas.schemas import UserResponse
 from app.routers.auth import admin_required
 
 router = APIRouter(
