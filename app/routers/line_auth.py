@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from ..utils.line_utils import verify_line_id_token
 from ..database import get_db
-from ..models.models import User, RefreshToken
+from ..models.models import User, RefreshToken, Role  # import Role model
 from ..core.config import settings
 from ..schemas.schemas import LineLoginRequest, TokenResponse, RefreshTokenRequest, RefreshTokenResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -26,23 +26,30 @@ def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
     if user:
         return user
     username = user_info.get("username") or f"user_{line_user_id[-6:]}"
+    # ดึง role_id ของ student จากตาราง role
+    student_role = db.query(Role).filter(Role.role_name == "student").first()
+    if not student_role:
+        raise HTTPException(status_code=500, detail="Role 'student' not found")
     new_user = User(
         line_user_id=line_user_id,
         username=username,
         password_hash="",
         name=user_info.get("name"),
         email=user_info.get("email"),
+        role_id=student_role.role_id
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
 
-def create_access_token(user: User):
+def create_access_token(user: User, db: Session):
+    role = db.query(Role).filter(Role.role_id == user.role_id).first()
+    role_name = role.role_name if role else "student"
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     payload = {
         "sub": str(user.user_id),
-        "name": user.name,
+        "role": role_name,
         "exp": expire
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -87,7 +94,7 @@ async def line_login(request_data: LineLoginRequest, db: Session = Depends(get_d
 
     line_user_id = user_info["sub"]
     user = get_or_create_user(db, line_user_id, user_info)
-    access_token = create_access_token(user)
+    access_token = create_access_token(user, db)
     refresh_token = create_refresh_token(user)
     store_refresh_token(db, user, refresh_token)
 
@@ -128,7 +135,7 @@ async def refresh_access_token(request_data: RefreshTokenRequest, db: Session = 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    new_access_token = create_access_token(user)
+    new_access_token = create_access_token(user, db)
     return {"access_token": new_access_token, "token_type": "bearer"}
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: Session = Depends(get_db)):
@@ -141,11 +148,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
-        if user_id is None:
+        role: str = payload.get("role")
+        if user_id is None or role is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     user = db.query(User).filter(User.user_id == int(user_id)).first()
     if user is None:
         raise credentials_exception
-    return user
+    return {"user": user, "role": role}
