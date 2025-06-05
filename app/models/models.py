@@ -22,6 +22,7 @@ class Role(Base):
     # description = Column(Text, nullable=True)
 
     users = relationship("User", back_populates="role")
+    admins = relationship("Admin", back_populates="role")
 
 class Student(Base):
     __tablename__ = "student"
