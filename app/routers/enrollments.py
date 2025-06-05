@@ -4,6 +4,7 @@ from typing import List
 from ..database import get_db
 from ..models.models import Enrollment, Invoice, Course
 from ..schemas.schemas import EnrollmentCreate, EnrollmentResponse, InvoiceCreate
+from app.routers.auth import admin_required
 from datetime import datetime, timedelta, date
 
 router = APIRouter(

@@ -348,6 +348,24 @@ class StudentExamResult(BaseModel):
         orm_mode = True
 
 
+# Admin Schemas
+class AdminBase(BaseModel):
+    username: str
+
+class AdminCreate(AdminBase):
+    password: str
+
+class AdminResponse(AdminBase):
+    admin_id: int
+    role_id: int
+    is_active: bool
+
+    class Config:
+        orm_mode = True
+
+class UserUpdateRole(BaseModel):
+    role_id: int
+
 # เพื่อแก้ไข circular reference
 CourseResponse.update_forward_refs()
 TeacherResponse.update_forward_refs()
