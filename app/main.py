@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine
 from .models import models
-from .routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams
+from app.routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams
 
 
 # สร้างตารางในฐานข้อมูล (ถ้ายังไม่มี)
