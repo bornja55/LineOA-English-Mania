@@ -7,7 +7,7 @@ from datetime import datetime
 # Role Schemas
 class RoleBase(BaseModel):
     role_name: str
-    description: Optional[str] = None
+    # description: Optional[str] = None
 
 class RoleCreate(RoleBase):
     pass
