@@ -5,7 +5,7 @@ from ..database import get_db
 from ..models.models import User, RefreshToken
 from ..core.config import settings
 from ..schemas.schemas import LineLoginRequest, TokenResponse, RefreshTokenRequest, RefreshTokenResponse
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 
@@ -19,7 +19,7 @@ ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/line/login")
+bearer_scheme = HTTPBearer()
 
 def get_or_create_user(db: Session, line_user_id: str, user_info: dict):
     user = db.query(User).filter(User.line_user_id == line_user_id).first()
@@ -131,7 +131,8 @@ async def refresh_access_token(request_data: RefreshTokenRequest, db: Session = 
     new_access_token = create_access_token(user)
     return {"access_token": new_access_token, "token_type": "bearer"}
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme), db: Session = Depends(get_db)):
+    token = credentials.credentials
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
