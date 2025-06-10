@@ -13,6 +13,7 @@ class User(Base):
     password_hash = Column(String, nullable=True)
     line_user_id = Column(String, unique=True, index=True, nullable=True)
     email = Column(String, unique=True, index=True, nullable=True)
+    name = Column(String, nullable=True)  # เพิ่ม field name
 
     role = relationship("Role", back_populates="users")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
