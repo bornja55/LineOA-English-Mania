@@ -1,4 +1,4 @@
-# backend/app/routers/exams.py
+# app/routers/exams.py
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Body
 from typing import List
 from sqlalchemy.orm import Session

@@ -1,3 +1,4 @@
+# app/routers/courses.py
 from fastapi import APIRouter
 from app.database import get_db
 from sqlalchemy.orm import Session
