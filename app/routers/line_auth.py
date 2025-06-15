@@ -11,6 +11,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from fastapi.responses import RedirectResponse
 import requests
+from typing import List
 
 router = APIRouter(
     prefix="/login",  # เปลี่ยนเป็น /login
@@ -80,7 +81,7 @@ def store_refresh_token(db: Session, user: User, refresh_token: str):
     db.refresh(db_refresh_token)
     return db_refresh_token
 
-def require_role(allowed_roles: List[str]):
+def require_role(allowed_roles: list[str]):  # เปลี่ยนจาก List[str] เป็น list[str]
     def role_checker(current_user=Depends(get_current_user)):
         if current_user.role is None or current_user.role.role_name not in allowed_roles:
             raise HTTPException(status_code=403, detail="Not enough permissions")
