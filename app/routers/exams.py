@@ -119,7 +119,7 @@ async def import_exam_file(
     file: UploadFile = File(None),
     sheet_url: str = Body(None),
     db: Session = Depends(get_db),
-    user=Depends(role_required(["admin", "teacher"]))
+    user=Depends(require_role(["admin", "teacher"]))
 ):
     # อ่านไฟล์หรือ Google Sheet
     if sheet_url:
