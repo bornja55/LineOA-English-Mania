@@ -9,12 +9,11 @@ class RoleBase(BaseModel):
     role_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoleResponse(RoleBase):
     pass
 
-# User Schemas
 class UserBase(BaseModel):
     user_id: int
     username: Optional[str]
@@ -22,7 +21,7 @@ class UserBase(BaseModel):
     role: Optional[RoleResponse] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserResponse(UserBase):
     pass

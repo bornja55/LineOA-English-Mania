@@ -22,7 +22,7 @@ def require_role(allowed_roles: List[str]):
 
 @router.get("/me", response_model=UserResponse)
 def read_own_profile(current_user=Depends(get_current_user)):
-    return current_user
+    return UserResponse.from_orm(current_user)
 
 @router.get("/", response_model=List[UserResponse])
 def list_users(
