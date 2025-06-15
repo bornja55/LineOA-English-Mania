@@ -180,8 +180,8 @@ async def line_callback(code: str, state: str, db: Session = Depends(get_db)):
             'grant_type': 'authorization_code',
             'code': code,
             'redirect_uri': 'https://api.englishmaniaasia.com/login/callback',
-            'client_id': settings.LINE_CHANNEL_ID,
-            'client_secret': settings.LINE_CHANNEL_SECRET
+            'client_id': settings.LINE_LOGIN_CHANNEL_ID,
+            'client_secret': settings.LINE_LOGIN_CHANNEL_SECRET
         }
         token_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         
