@@ -5,7 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from .database import engine
 from .models import models
-from app.routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams, admin, line_auth, line_webhook, users
+from app.routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams, admin, line_auth, line_webhook, users, payments
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -41,6 +41,7 @@ app.include_router(finance.router)
 app.include_router(exams.router)
 app.include_router(admin.router)
 app.include_router(users.router)
+app.include_router(payments.router)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/admin/login")
 bearer_scheme = HTTPBearer()
