@@ -19,6 +19,7 @@ origins = [
     "https://bornja55.github.io",
     "http://localhost",
     "http://localhost:3000",
+    "http://35.209.165.43:3000",
 ]
 
 app.add_middleware(
