@@ -5,7 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from .database import engine
 from .models import models
-from app.routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams, admin
+from app.routers import students, courses, enrollments, auth, line_auth, line_webhook, invoice, finance, exams, admin, line_auth, line_webhook
 
 models.Base.metadata.create_all(bind=engine)
 

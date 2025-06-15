@@ -9,9 +9,11 @@ from ..schemas.schemas import LineLoginRequest, TokenResponse, RefreshTokenReque
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from fastapi.responses import RedirectResponse
+import requests
 
 router = APIRouter(
-    prefix="/auth/line",
+    prefix="/login",  # เปลี่ยนเป็น /login
     tags=["line_auth"]
 )
 
@@ -165,3 +167,60 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
     if user is None:
         raise credentials_exception
     return {"user": user, "role": role}
+
+@router.get("/callback")  # เปลี่ยนจาก /auth/line/callback เป็น /login/callback
+async def line_callback(code: str, state: str, db: Session = Depends(get_db)):
+    """
+    รับ authorization code จาก LINE แล้วแลกเป็น access token
+    """
+    try:
+        # 1. แลก code เป็น access token
+        token_url = "https://api.line.me/oauth2/v2.1/token"
+        token_data = {
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': 'https://api.englishmaniaasia.com/login/callback',
+            'client_id': settings.LINE_CHANNEL_ID,
+            'client_secret': settings.LINE_CHANNEL_SECRET
+        }
+        token_headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        
+        token_response = requests.post(token_url, data=token_data, headers=token_headers)
+        token_result = token_response.json()
+        
+        if 'access_token' not in token_result:
+            raise HTTPException(status_code=400, detail="Failed to get access token")
+        
+        access_token = token_result['access_token']
+        id_token = token_result.get('id_token')
+        
+        # 2. ดึงข้อมูล profile
+        profile_url = "https://api.line.me/v2/profile"
+        profile_headers = {'Authorization': f'Bearer {access_token}'}
+        profile_response = requests.get(profile_url, headers=profile_headers)
+        profile_data = profile_response.json()
+        
+        # 3. สร้าง user หรือดึง user ที่มีอยู่
+        line_user_id = profile_data['userId']
+        user_info = {
+            'name': profile_data.get('displayName'),
+            'email': profile_data.get('email'),  # อาจจะไม่มี
+            'username': f"line_{line_user_id[-6:]}"
+        }
+        
+        user = get_or_create_user(db, line_user_id, user_info)
+        
+        # 4. สร้าง JWT tokens
+        jwt_access_token = create_access_token(user, db)
+        refresh_token = create_refresh_token(user)
+        store_refresh_token(db, user, refresh_token)
+        
+        # 5. Redirect กลับ frontend พร้อม token
+        frontend_url = f"http://localhost:3000/dashboard?token={jwt_access_token}&refresh_token={refresh_token}"
+        return RedirectResponse(url=frontend_url, status_code=302)
+        
+    except Exception as e:
+        print(f"LINE callback error: {e}")
+        # Redirect กลับ login page พร้อม error
+        frontend_url = "http://localhost:3000/login?error=login_failed"
+        return RedirectResponse(url=frontend_url, status_code=302)
