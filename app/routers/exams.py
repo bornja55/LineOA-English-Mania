@@ -6,7 +6,7 @@ import pandas as pd
 import re
 
 from app.database import get_db
-from app.routers.line_auth import get_current_user, role_required
+from app.routers.line_auth import get_current_user, require_role
 from app.schemas import schemas
 from app.models import models
 from app.core.security import admin_required
@@ -23,7 +23,7 @@ router = APIRouter(
 def create_exam(
     exam: schemas.ExamCreate,
     db: Session = Depends(get_db),
-    user=Depends(role_required(["admin", "teacher"]))
+    user=Depends(require_role(["admin", "teacher"]))
 ):
     db_exam = models.Exam(**exam.dict())
     db.add(db_exam)
@@ -50,7 +50,7 @@ def get_exam(exam_id: int, db: Session = Depends(get_db)):
 def start_exam(
     exam_id: int,
     db: Session = Depends(get_db),
-    user=Depends(role_required(["student"]))  # ตรวจสอบ role ว่าเป็น student เท่านั้น
+    user=Depends(require_role(["student"]))  # ตรวจสอบ role ว่าเป็น student เท่านั้น
 ):
     exam = db.query(models.Exam).filter(models.Exam.exam_id == exam_id).first()
     if not exam:
