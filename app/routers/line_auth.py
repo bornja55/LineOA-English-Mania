@@ -80,9 +80,9 @@ def store_refresh_token(db: Session, user: User, refresh_token: str):
     db.refresh(db_refresh_token)
     return db_refresh_token
 
-def role_required(allowed_roles: list):
-    def role_checker(current_user: dict = Depends(get_current_user)):
-        if current_user["role"] not in allowed_roles:
+def require_role(allowed_roles: List[str]):
+    def role_checker(current_user=Depends(get_current_user)):
+        if current_user.role is None or current_user.role.role_name not in allowed_roles:
             raise HTTPException(status_code=403, detail="Not enough permissions")
         return current_user
     return role_checker
@@ -166,7 +166,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
     user = db.query(User).filter(User.user_id == int(user_id)).first()
     if user is None:
         raise credentials_exception
-    return {"user": user, "role": role}
+    return user
 
 @router.get("/callback")  # เปลี่ยนจาก /auth/line/callback เป็น /login/callback
 async def line_callback(code: str, state: str, db: Session = Depends(get_db)):
